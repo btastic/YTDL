@@ -2,6 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <StartupObject />
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Bass boosted sound effect.mp4" />
+    <None Remove="Bass boosted sound effect.mp4.sfk" />
+    <None Remove="hit marker Sound Effect.mp4" />
+    <None Remove="hit marker Sound Effect.mp4.sfk" />
+    <None Remove="Super Smash Bros. Ultimate – King K. Rool gameplay %28Nintendo Switch%29.mp4" />
+    <None Remove="Super Smash Bros. Ultimate – King K. Rool gameplay %28Nintendo Switch%29.mp4.sfk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xabe.FFmpeg" Version="3.1.4" />
+    <PackageReference Include="YoutubeExplode" Version="4.6.4" />
+  </ItemGroup>
 
 </Project>
