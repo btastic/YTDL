@@ -79,30 +79,7 @@ namespace YTDL
 
             return ffmpegExists && ffProbeExists;
         }
-
-        private static bool GetYesOrNo(string question)
-        {
-            while (true)
-            {
-                Console.Write(question);
-
-                var input = Console.ReadLine();
-
-                if (string.IsNullOrEmpty(input))
-                {
-                    continue;
-                }
-
-                switch (input.ToLower())
-                {
-                    case "n":
-                        return false;
-                    case "y":
-                        return true;
-                }
-            }
-        }
-
+                
         private static string ParseVideoId()
         {
             Console.Write("Enter link > ");
@@ -142,8 +119,6 @@ namespace YTDL
                     {
                         break;
                     }
-
-                    var convertAudio = false;
 
                     await DownloadAudioAsync(videoId);
                     break;
