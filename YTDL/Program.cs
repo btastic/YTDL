@@ -143,6 +143,7 @@ namespace YTDL
                     Console.WriteLine($"Downloading ffmpeg. This might take a while ... ");
                     await FFmpeg.GetLatestVersion();
                     Console.WriteLine($"ffmpeg downloaded ... ");
+                    _ffmpegAvailable = true;
                     break;
 
                 case MenuOption.Exit:
