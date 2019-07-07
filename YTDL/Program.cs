@@ -192,13 +192,6 @@ namespace YTDL
 
             var conversion = Conversion.ExtractAudio(downloadedFile, mp3File);
             conversion.SetOverwriteOutput(true);
-            //var conversion = Conversion
-            //    .New()
-            //    .SetPreset(ConversionPreset.VerySlow)
-            //    .UseMultiThread(true)
-            //    .AddStream(mediaInfo.AudioStreams.FirstOrDefault())
-            //    .SetOutput(mp3File)
-            //    .SetOverwriteOutput(true);
 
             Console.ForegroundColor = ConsoleColor.Cyan;
             var progress = new ConsoleProgressBar();
@@ -206,8 +199,6 @@ namespace YTDL
             conversion.OnProgress += (sender, args) =>
             {
                 var percent = args.Duration.TotalSeconds / args.TotalLength.TotalSeconds;
-                // we can safely ignore this error due to always disposing it
-                // ReSharper disable once AccessToDisposedClosure
                 progress.Report(percent);
             };
 
