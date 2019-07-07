@@ -191,7 +191,9 @@ namespace YTDL
             Console.Write($"Convert to mp3 ... ");
 
             var conversion = Conversion.ExtractAudio(downloadedFile, mp3File);
+            
             conversion.SetOverwriteOutput(true);
+            conversion.UseMultiThread(true);
 
             Console.ForegroundColor = ConsoleColor.Cyan;
             var progress = new ConsoleProgressBar();
