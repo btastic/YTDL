@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -28,6 +29,14 @@ namespace YTDL
 
         public static async Task Main()
         {
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                e.Cancel = true;
+                cancellationTokenSource.Cancel();
+            };
+
             _ffmpegAvailable = FFMpegAvailable();
 
             PrintMenu(true);
@@ -35,15 +44,12 @@ namespace YTDL
 
             while (true)
             {
-                var cancellationTokenSource = new CancellationTokenSource();
-
-                Console.CancelKeyPress -= delegate (object sender, ConsoleCancelEventArgs e) { };
-                Console.CancelKeyPress += (sender, e) =>
+                if (cancellationTokenSource.Token.IsCancellationRequested)
                 {
-                    e.Cancel = true;
-                    cancellationTokenSource.Cancel();
-                };
+                    cancellationTokenSource = new CancellationTokenSource();
+                }
 
+                cancellationTokenSource = new CancellationTokenSource();
                 var optionInput = Console.ReadLine();
 
                 var command = EvaluateInput(optionInput);
@@ -59,7 +65,7 @@ namespace YTDL
                 {
                     await ExecuteCommand(command, cancellationTokenSource.Token);
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                     Console.WriteLine("Task was canceled by user.");
                 }
@@ -160,9 +166,18 @@ namespace YTDL
                         break;
                     }
                     Console.WriteLine($"Downloading ffmpeg. This might take a while ... ");
-                    await FFmpeg.GetLatestVersion();
-                    Console.WriteLine($"ffmpeg downloaded ... ");
-                    _ffmpegAvailable = true;
+                    var downloaded = await FFmpegDownloader.DownloadFFmpegAsync();
+
+                    if (downloaded)
+                    {
+                        Console.WriteLine($"ffmpeg downloaded ... ");
+                        _ffmpegAvailable = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("ffmpeg download failed.");
+                    }
+
                     break;
 
                 case MenuOption.Exit:
@@ -223,8 +238,10 @@ namespace YTDL
                 progress.Report(percent);
             };
 
+            Stopwatch sw = new Stopwatch();
             try
             {
+                sw.Start();
                 await conversion.Start(cancellationToken);
             }
             catch (ConversionException ex)
@@ -234,9 +251,12 @@ namespace YTDL
             }
             finally
             {
+                sw.Stop();
                 progress.Dispose();
                 Console.ResetColor();
             }
+
+            Console.WriteLine($"Conversion took {sw.ElapsedMilliseconds} ms");
 
             File.Delete(downloadedFile);
 

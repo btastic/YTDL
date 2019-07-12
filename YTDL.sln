@@ -1,20 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2041
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28917.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YTDL", "YTDL\YTDL.csproj", "{81AD264A-59E4-4954-A910-4B6F512B01DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YTDL", "YTDL\YTDL.csproj", "{81AD264A-59E4-4954-A910-4B6F512B01DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{81AD264A-59E4-4954-A910-4B6F512B01DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{81AD264A-59E4-4954-A910-4B6F512B01DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81AD264A-59E4-4954-A910-4B6F512B01DD}.Debug|x64.ActiveCfg = Debug|x64
+		{81AD264A-59E4-4954-A910-4B6F512B01DD}.Debug|x64.Build.0 = Debug|x64
 		{81AD264A-59E4-4954-A910-4B6F512B01DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81AD264A-59E4-4954-A910-4B6F512B01DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81AD264A-59E4-4954-A910-4B6F512B01DD}.Release|x64.ActiveCfg = Release|x64
+		{81AD264A-59E4-4954-A910-4B6F512B01DD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
