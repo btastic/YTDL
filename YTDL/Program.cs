@@ -194,7 +194,7 @@ namespace YTDL
             var generalInfo = await Client.GetVideoAsync(videoId);
             var videoInfo = await Client.GetVideoMediaStreamInfosAsync(videoId);
 
-            var audioInfo = videoInfo.Audio.WithHighestVideoQuality();
+            var audioInfo = videoInfo.Audio.WithHighestBitrate();
             var downloadedFile = await DownloadMedia(audioInfo, generalInfo, cancellationToken);
             var convertedFile = await ConvertAudio(downloadedFile, cancellationToken);
 
