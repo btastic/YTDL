@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Exceptions;
 using YoutubeExplode;
@@ -27,8 +28,12 @@ namespace YTDL
 
         private static bool _ffmpegAvailable;
 
+        public static ApplicationConfiguration ApplicationConfiguration { get; private set; }
+
         public static async Task Main()
         {
+            Initialize();
+
             var cancellationTokenSource = new CancellationTokenSource();
 
             Console.CancelKeyPress += (sender, e) =>
@@ -76,6 +81,23 @@ namespace YTDL
                 Console.Clear();
                 PrintMenu(true);
             }
+        }
+
+        private static void Initialize()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+            var configuration = builder.Build();
+
+            var config = new ApplicationConfiguration();
+            configuration.Bind("Settings", config);
+
+            ApplicationConfiguration = config;
+
+            ApplicationConfiguration.DownloadPathOverride =
+                Environment.ExpandEnvironmentVariables(ApplicationConfiguration.DownloadPathOverride);
         }
 
         private static bool FFMpegAvailable()
@@ -222,6 +244,11 @@ namespace YTDL
 
             var mp3File = Path.ChangeExtension(downloadedFile, "mp3");
 
+            if (!string.IsNullOrEmpty(ApplicationConfiguration.DownloadPathOverride))
+            {
+                mp3File = Path.Combine(ApplicationConfiguration.DownloadPathOverride, mp3File);
+            }
+
             Console.Write($"Convert to mp3 ... ");
 
             var conversion = Conversion.ExtractAudio(downloadedFile, mp3File);
@@ -258,7 +285,10 @@ namespace YTDL
 
             Console.WriteLine($"Conversion took {sw.ElapsedMilliseconds} ms");
 
-            File.Delete(downloadedFile);
+            if (!ApplicationConfiguration.KeepSourceFile)
+            {
+                File.Delete(downloadedFile);
+            }
 
             return mp3File;
         }
@@ -281,6 +311,11 @@ namespace YTDL
             var fileName = $"{generalInfo.Title}.{fileExtension}";
 
             fileName = Path.GetInvalidFileNameChars().Aggregate(fileName, (current, c) => current.Replace(c, '-'));
+
+            if (!string.IsNullOrEmpty(ApplicationConfiguration.DownloadPathOverride))
+            {
+                fileName = Path.Combine(ApplicationConfiguration.DownloadPathOverride, fileName);
+            }
 
             Console.Write("Downloading... ");
 
