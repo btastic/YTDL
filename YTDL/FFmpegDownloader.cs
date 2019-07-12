@@ -42,6 +42,8 @@ namespace YTDL
 
             Directory.Delete($".\\{ffmpegFolderName}\\", true);
 
+            File.Delete($".\\{ffmpegZipName}");
+
             return true;
         }
     }
