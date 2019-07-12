@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -8,15 +8,6 @@
     <LangVersion>7.3</LangVersion>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Bass boosted sound effect.mp4" />
-    <None Remove="Bass boosted sound effect.mp4.sfk" />
-    <None Remove="hit marker Sound Effect.mp4" />
-    <None Remove="hit marker Sound Effect.mp4.sfk" />
-    <None Remove="Super Smash Bros. Ultimate – King K. Rool gameplay %28Nintendo Switch%29.mp4" />
-    <None Remove="Super Smash Bros. Ultimate – King K. Rool gameplay %28Nintendo Switch%29.mp4.sfk" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.4" />
