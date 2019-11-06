@@ -44,6 +44,11 @@ namespace YTDL
 
             _ffmpegAvailable = FFMpegAvailable();
 
+            if (_ffmpegAvailable)
+            {
+                FFmpeg.ExecutablesPath = new DirectoryInfo(".").FullName;
+            }
+
             PrintMenu(true);
 
 
