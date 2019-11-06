@@ -43,14 +43,8 @@ namespace YTDL
             };
 
             _ffmpegAvailable = FFMpegAvailable();
-
-            if (_ffmpegAvailable)
-            {
-                FFmpeg.ExecutablesPath = new DirectoryInfo(".").FullName;
-            }
-
+            
             PrintMenu(true);
-
 
             while (true)
             {
@@ -103,6 +97,8 @@ namespace YTDL
 
             ApplicationConfiguration.DownloadPathOverride =
                 Environment.ExpandEnvironmentVariables(ApplicationConfiguration.DownloadPathOverride);
+
+            FFmpeg.ExecutablesPath = new DirectoryInfo(".").FullName;
         }
 
         private static bool FFMpegAvailable()
