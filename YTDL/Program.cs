@@ -8,8 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Exceptions;
 using YoutubeExplode;
-using YoutubeExplode.Models;
-using YoutubeExplode.Models.MediaStreams;
+using YoutubeExplode.Videos;
+using YoutubeExplode.Videos.Streams;
 
 namespace YTDL
 {
@@ -43,7 +43,7 @@ namespace YTDL
             };
 
             _ffmpegAvailable = FFMpegAvailable();
-            
+
             PrintMenu(true);
 
             while (true)
@@ -137,7 +137,7 @@ namespace YTDL
 
             try
             {
-                videoId = YoutubeClient.ParseVideoId(link);
+                videoId = new VideoId(link);
             }
             catch (Exception)
             {
@@ -229,10 +229,10 @@ namespace YTDL
         private static async Task DownloadAudioAsync(string videoId, CancellationToken cancellationToken)
         {
             Console.WriteLine($"[{videoId}] Loading data ... ");
-            var generalInfo = await Client.GetVideoAsync(videoId);
-            var videoInfo = await Client.GetVideoMediaStreamInfosAsync(videoId);
+            var generalInfo = await Client.Videos.GetAsync(videoId);
+            var videoInfo = await Client.Videos.Streams.GetManifestAsync(videoId);
 
-            var audioInfo = videoInfo.Audio.WithHighestBitrate();
+            var audioInfo = videoInfo.GetAudio().WithHighestBitrate();
             var downloadedFile = await DownloadMedia(audioInfo, generalInfo, cancellationToken);
             var convertedFile = await ConvertAudio(downloadedFile, cancellationToken);
 
@@ -297,18 +297,18 @@ namespace YTDL
         private static async Task DownloadVideoAsync(string videoId, CancellationToken cancellationToken)
         {
             Console.WriteLine($"[{videoId}] Loading data ... ");
-            var generalInfo = await Client.GetVideoAsync(videoId);
-            var videoInfo = await Client.GetVideoMediaStreamInfosAsync(videoId);
+            var generalInfo = await Client.Videos.GetAsync(videoId);
+            var videoInfo = await Client.Videos.Streams.GetManifestAsync(videoId);
 
-            var streamInfo = videoInfo.Muxed.WithHighestVideoQuality();
+            var streamInfo = videoInfo.GetMuxed().WithHighestVideoQuality();
             var downloadedFile = await DownloadMedia(streamInfo, generalInfo, cancellationToken);
 
             Console.WriteLine($"Downloaded to: {downloadedFile}");
         }
 
-        private static async Task<string> DownloadMedia(MediaStreamInfo mediaInfo, Video generalInfo, CancellationToken cancellationToken)
+        private static async Task<string> DownloadMedia(IStreamInfo mediaInfo, Video generalInfo, CancellationToken cancellationToken)
         {
-            var fileExtension = mediaInfo.Container.GetFileExtension();
+            var fileExtension = mediaInfo.Container.Name;
             var fileName = $"{generalInfo.Title}.{fileExtension}";
 
             fileName = Path.GetInvalidFileNameChars().Aggregate(fileName, (current, c) => current.Replace(c, '-'));
@@ -324,7 +324,8 @@ namespace YTDL
 
             using (var progress = new ConsoleProgressBar())
             {
-                await Client.DownloadMediaStreamAsync(mediaInfo, fileName, progress, cancellationToken);
+                await Client.Videos.Streams.DownloadAsync(mediaInfo, fileName, progress, cancellationToken);
+                ;
             }
 
             Console.ResetColor();
