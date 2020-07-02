@@ -32,6 +32,11 @@ namespace YTDL
 
         public static async Task Main(string[] args)
         {
+            // this ensures we are always in the right directory
+            // otherwise the config won't be found
+            var exeDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            Directory.SetCurrentDirectory(exeDirectory);
+
             Initialize();
             var cancellationTokenSource = new CancellationTokenSource();
             _ffmpegAvailable = FFMpegAvailable();
