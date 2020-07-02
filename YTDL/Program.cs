@@ -30,11 +30,38 @@ namespace YTDL
 
         public static ApplicationConfiguration ApplicationConfiguration { get; private set; }
 
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
             Initialize();
-
             var cancellationTokenSource = new CancellationTokenSource();
+            _ffmpegAvailable = FFMpegAvailable();
+
+            if (args.Length > 0 && !string.IsNullOrEmpty(args[0]))
+            {
+                if (_ffmpegAvailable)
+                {
+                    var videoId = new VideoId(args[0]);
+                    var downloadedFile =
+                        await ExecuteCommand(MenuOption.DownloadAudio, videoId, cancellationTokenSource.Token);
+
+                    if (ApplicationConfiguration.OpenAfterCommandLineDownload)
+                    {
+                        OpenWithDefaultProgram(downloadedFile);
+                    }
+
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    var color = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("WARNING");
+                    Console.WriteLine("Parsing via command line is only available when FFMpeg was previously installed.");
+                    Console.WriteLine("");
+                    Console.ForegroundColor = color;
+                }
+            }
+
 
             Console.CancelKeyPress += (sender, e) =>
             {
@@ -42,7 +69,6 @@ namespace YTDL
                 cancellationTokenSource.Cancel();
             };
 
-            _ffmpegAvailable = FFMpegAvailable();
 
             PrintMenu(true);
 
@@ -67,7 +93,7 @@ namespace YTDL
 
                 try
                 {
-                    await ExecuteCommand(command, cancellationTokenSource.Token);
+                    await ExecuteCommand(command, new VideoId(), cancellationTokenSource.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -128,7 +154,7 @@ namespace YTDL
             return ffmpegExists && ffProbeExists;
         }
 
-        private static string ParseVideoId()
+        private static VideoId ParseVideoId()
         {
             Console.Write("Enter link > ");
             var link = Console.ReadLine();
@@ -148,10 +174,8 @@ namespace YTDL
             return videoId;
         }
 
-        private static async Task ExecuteCommand(MenuOption command, CancellationToken cancellationToken)
+        private static async Task<string> ExecuteCommand(MenuOption command, VideoId videoId = default, CancellationToken cancellationToken = default)
         {
-            string videoId;
-
             switch (command)
             {
                 case MenuOption.DownloadAudio:
@@ -161,15 +185,17 @@ namespace YTDL
                         break;
                     }
 
-                    videoId = ParseVideoId();
+                    if (videoId == default)
+                    {
+                        videoId = ParseVideoId();
+                    }
 
                     if (string.IsNullOrEmpty(videoId))
                     {
                         break;
                     }
 
-                    await DownloadAudioAsync(videoId, cancellationToken);
-                    break;
+                    return await DownloadAudioAsync(videoId, cancellationToken);
 
                 case MenuOption.DownloadVideo:
                     videoId = ParseVideoId();
@@ -179,8 +205,7 @@ namespace YTDL
                         break;
                     }
 
-                    await DownloadVideoAsync(videoId, cancellationToken);
-                    break;
+                    return await DownloadVideoAsync(videoId, cancellationToken);
 
                 case MenuOption.DownloadFFMpeg:
                     if (_ffmpegAvailable)
@@ -207,6 +232,8 @@ namespace YTDL
                     Environment.Exit(0);
                     break;
             }
+
+            return string.Empty;
         }
 
         private static MenuOption EvaluateInput(string optionInput)
@@ -226,7 +253,7 @@ namespace YTDL
             }
         }
 
-        private static async Task DownloadAudioAsync(string videoId, CancellationToken cancellationToken)
+        private static async Task<string> DownloadAudioAsync(string videoId, CancellationToken cancellationToken)
         {
             Console.WriteLine($"[{videoId}] Loading data ... ");
             var generalInfo = await Client.Videos.GetAsync(videoId);
@@ -237,6 +264,8 @@ namespace YTDL
             var convertedFile = await ConvertAudio(downloadedFile, cancellationToken);
 
             Console.WriteLine($"Converted to: {convertedFile}");
+
+            return convertedFile;
         }
 
         private static async Task<string> ConvertAudio(string downloadedFile, CancellationToken cancellationToken)
@@ -294,7 +323,7 @@ namespace YTDL
             return mp3File;
         }
 
-        private static async Task DownloadVideoAsync(string videoId, CancellationToken cancellationToken)
+        private static async Task<string> DownloadVideoAsync(string videoId, CancellationToken cancellationToken)
         {
             Console.WriteLine($"[{videoId}] Loading data ... ");
             var generalInfo = await Client.Videos.GetAsync(videoId);
@@ -304,6 +333,8 @@ namespace YTDL
             var downloadedFile = await DownloadMedia(streamInfo, generalInfo, cancellationToken);
 
             Console.WriteLine($"Downloaded to: {downloadedFile}");
+
+            return downloadedFile;
         }
 
         private static async Task<string> DownloadMedia(IStreamInfo mediaInfo, Video generalInfo, CancellationToken cancellationToken)
@@ -362,6 +393,14 @@ namespace YTDL
             Console.WriteLine("");
 
             Console.Write("Please enter an option > ");
+        }
+
+        public static void OpenWithDefaultProgram(string path)
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = "explorer";
+            process.StartInfo.Arguments = "\"" + path + "\"";
+            process.Start();
         }
 
         private static void PrintLogo()
