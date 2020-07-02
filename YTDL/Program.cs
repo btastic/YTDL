@@ -232,7 +232,7 @@ namespace YTDL
             var generalInfo = await Client.Videos.GetAsync(videoId);
             var videoInfo = await Client.Videos.Streams.GetManifestAsync(videoId);
 
-            var audioInfo = videoInfo.GetAudio().WithHighestBitrate();
+            var audioInfo = videoInfo.GetAudioOnly().WithHighestBitrate();
             var downloadedFile = await DownloadMedia(audioInfo, generalInfo, cancellationToken);
             var convertedFile = await ConvertAudio(downloadedFile, cancellationToken);
 
@@ -325,7 +325,6 @@ namespace YTDL
             using (var progress = new ConsoleProgressBar())
             {
                 await Client.Videos.Streams.DownloadAsync(mediaInfo, fileName, progress, cancellationToken);
-                ;
             }
 
             Console.ResetColor();
