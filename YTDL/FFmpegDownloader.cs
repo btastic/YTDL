@@ -12,7 +12,7 @@ namespace YTDL
         {
             var architecture = Environment.Is64BitProcess ? "win64" : "win32";
             
-            var ffmpegVersion = "4.3";
+            var ffmpegVersion = "4.1.3";
             var ffmpegFolderName = $"ffmpeg-{ffmpegVersion}-{architecture}-static";
             var ffmpegZipName = $"{ffmpegFolderName}.zip";
             var ffmpegDownloadUrl = $"https://ffmpeg.zeranoe.com/builds/{architecture}/static/{ffmpegZipName}";
