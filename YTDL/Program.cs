@@ -2,14 +2,17 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Konseben.CueSheets;
 using Microsoft.Extensions.Configuration;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Exceptions;
 using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
+using YTDL.YoutubeExplode;
 
 namespace YTDL
 {
@@ -268,9 +271,73 @@ namespace YTDL
             var downloadedFile = await DownloadMedia(audioInfo, generalInfo, cancellationToken);
             var convertedFile = await ConvertAudio(downloadedFile, cancellationToken);
 
+            if (ApplicationConfiguration.CreateCueFileFromChapters)
+            {
+                await CreateCueFile(generalInfo, convertedFile);
+            }
+
             Console.WriteLine($"Converted to: {convertedFile}");
 
             return convertedFile;
+        }
+
+        private static async Task CreateCueFile(Video video, string targetMp3File)
+        {
+            var chapters = await video.TryGetChaptersAsync(Client);
+
+            if (chapters.Count() == 0)
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("No chapters found for video.");
+                Console.ForegroundColor = color;
+
+                return;
+            }
+
+            var filePath = Path.GetDirectoryName(targetMp3File);
+            var fileName = Path.GetFileName(targetMp3File);
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(targetMp3File);
+
+            var cueSheet = new CueSheet
+            {
+                Performer = "Various Artists",
+                Title = video.Title,
+                File = fileName,
+                FileType = "MP3",
+            };
+
+            int trackIndex = 0;
+            foreach (var chapter in chapters)
+            {
+                var artist = chapter.Title;
+                var title = chapter.Title;
+
+                MatchCollection regexResult = Regex.Matches(chapter.Title, "^(.+)(?=-)|(?!<-)([^-]+)$");
+
+                if (regexResult.Count > 0)
+                {
+                    if (regexResult[0].Success && regexResult[1].Success)
+                    {
+                        artist = regexResult[0].Groups[0].Value.Trim();
+                        title = regexResult[1].Groups[0].Value.Trim();
+                    }
+                }
+
+                var duration = TimeSpan.FromMilliseconds(chapter.TimeRangeStart);
+
+                if (cueSheet.Tracks.Count == 0)
+                {
+                    cueSheet.AddTrack(title, artist);
+                    cueSheet.AddIndex(trackIndex++, 1, 0, 0, 0);
+                    continue;
+                }
+
+                cueSheet.AddTrack(title, artist);
+                cueSheet.AddIndex(trackIndex++, 1, (int)Math.Round(duration.TotalMinutes, MidpointRounding.ToEven), duration.Seconds, 0);
+            }
+
+            cueSheet.SaveCue(Path.Combine(filePath, fileNameWithoutExtension + ".cue"));
         }
 
         private static async Task<string> ConvertAudio(string downloadedFile, CancellationToken cancellationToken)
