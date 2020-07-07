@@ -273,7 +273,8 @@ namespace YTDL
 
             if (ApplicationConfiguration.CreateCueFileFromChapters)
             {
-                await CreateCueFile(generalInfo, convertedFile);
+                Console.WriteLine("Generating cue file ... ");
+                await CreateCueFileFromChapters(generalInfo, convertedFile);
             }
 
             Console.WriteLine($"Converted to: {convertedFile}");
@@ -281,8 +282,9 @@ namespace YTDL
             return convertedFile;
         }
 
-        private static async Task CreateCueFile(Video video, string targetMp3File)
+        private static async Task CreateCueFileFromChapters(Video video, string targetMp3File)
         {
+            Console.WriteLine("Try getting chapters ... ");
             var chapters = await video.TryGetChaptersAsync(Client);
 
             if (chapters.Count() == 0)
@@ -315,7 +317,7 @@ namespace YTDL
 
                 MatchCollection regexResult = Regex.Matches(chapter.Title, "^(.+)(?=-)|(?!<-)([^-]+)$");
 
-                if (regexResult.Count > 0)
+                if (regexResult.Count > 1)
                 {
                     if (regexResult[0].Success && regexResult[1].Success)
                     {
