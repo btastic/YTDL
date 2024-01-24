@@ -1,29 +1,28 @@
-﻿namespace YTDL.YoutubeExplode
+﻿namespace YTDL.YoutubeExplode;
+
+/// <summary>
+/// YouTube video chapter.
+/// </summary>
+public class Chapter
 {
     /// <summary>
-    /// YouTube video chapter.
+    /// Chapter Title.
     /// </summary>
-    public class Chapter
+    public string Title { get; }
+
+    /// <summary>
+    /// Start of the chapter in milliseconds.
+    /// </summary>
+    public ulong TimeRangeStart { get; }
+
+    /// <summary>
+    /// Initializes an instance of <see cref="Chapter"/>.
+    /// </summary>
+    public Chapter(
+        string title,
+        ulong timeRangeStart)
     {
-        /// <summary>
-        /// Chapter Title.
-        /// </summary>
-        public string Title { get; }
-
-        /// <summary>
-        /// Start of the chapter in milliseconds.
-        /// </summary>
-        public ulong TimeRangeStart { get; }
-
-        /// <summary>
-        /// Initializes an instance of <see cref="Chapter"/>.
-        /// </summary>
-        public Chapter(
-            string title,
-            ulong timeRangeStart)
-        {
-            Title = title;
-            TimeRangeStart = timeRangeStart;
-        }
+        Title = title;
+        TimeRangeStart = timeRangeStart;
     }
 }
