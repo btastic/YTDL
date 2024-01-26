@@ -258,7 +258,6 @@ public static class Program
         return string.Empty;
     }
 
-
     private static async Task<string> DownloadAudioAsync(string videoId, CancellationToken cancellationToken)
     {
         AnsiConsole.WriteLine($"[{videoId}] Loading data ... ");
@@ -416,8 +415,8 @@ public static class Program
             .StartAsync(async ctx =>
             {
                 var downloadTask = ctx.AddTask("Downloading video stream");
-                downloadTask.IsIndeterminate(true);
-                await Client.Videos.Streams.DownloadAsync(mediaInfo, fileName, null, cancellationToken);
+                downloadTask.MaxValue = 1;
+                await Client.Videos.Streams.DownloadAsync(mediaInfo, fileName, downloadTask, cancellationToken);
             });
 
         return fileName;
